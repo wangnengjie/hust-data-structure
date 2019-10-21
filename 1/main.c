@@ -10,7 +10,26 @@
  */
 void printMenu();
 
+/**
+ * @description: print the element
+ * @param {ElemType *} - element
+ * @return {Status}
+ */
 Status printElement(ElemType *);
+
+/**
+ * @description: Save data to file
+ * @param {SqList *} - list
+ * @return {Status}
+ */
+Status saveToFile(SqList *);
+
+/**
+ * @description: Load data from file
+ * @param {SqList *} - list to load
+ * @return {Status}
+ */
+Status loadFromFile(SqList *);
 
 int main(void)
 {
@@ -18,7 +37,7 @@ int main(void)
     for (int i = 0; i < LIST_TABLE_SIZE; i++)
         (listArray + i)->elem = NULL;
 
-    int listIndex = 0;
+    int listIndex = 0, previousIndex = 0;
     SqList *curList = listArray + listIndex;
     do
     {
@@ -27,14 +46,11 @@ int main(void)
         Status status;
         ElemType e;
         if (!scanf("%d", &option))
-        {
             printf("You've entered an invalid number\n");
-            while (getchar() != '\n')
-                ;
-        }
         else
         {
-            getchar();
+            while (getchar() != '\n')
+                ;
             if (option == 0)
                 break;
             switch (option)
@@ -167,6 +183,53 @@ int main(void)
                 printf("Traverse list %d\n", listIndex + 1);
                 status = listTraverse(*curList, printElement);
                 status != OK &&printf("\nFailed to traverse!\n");
+                break;
+            case 13:
+                printf("Please enter the list to switch:\n");
+                if (!scanf("%d", &listIndex) || listIndex > LIST_TABLE_SIZE || listIndex < 1)
+                {
+                    printf("[Error]: Invalid value\n");
+                    listIndex = previousIndex;
+                    while (getchar() != '\n')
+                        ;
+                    break;
+                }
+                listIndex--;
+                printf("[Info]: Success\n");
+                curList = listArray + listIndex;
+                while (getchar() != '\n')
+                    ;
+                break;
+            case 14:
+                printf("Choose a list to save:\n");
+                if (!scanf("%d", &input) || input > LIST_TABLE_SIZE || input < 1)
+                {
+                    printf("[Error]: Invalid value\n");
+                    while (getchar() != '\n')
+                        ;
+                    break;
+                }
+                status = saveToFile(&listArray[input - 1]);
+                printf(status == OK ? "[Info]: Saved successfully\n"
+                                    : "[Error]: Failed to save\n");
+                while (getchar() != '\n')
+                    ;
+                break;
+            case 15:
+                printf("Choose a list to save the date from a file:\n");
+                if (!scanf("%d", &input) || input > LIST_TABLE_SIZE || input < 1)
+                {
+                    printf("[Error]: Invalid value\n");
+                    while (getchar() != '\n')
+                        ;
+                    break;
+                }
+                status = loadFromFile(&listArray[input - 1]);
+                printf(status == OK ? "[Info]: Loaded successfully\n"
+                                    : "[Error]: Failed to load\n");
+                while (getchar() != '\n')
+                    ;
+                break;
             default:
                 break;
             }
@@ -196,6 +259,8 @@ void printMenu()
            "     |   7. locateElem    8. priorElem      | \n"
            "     |   9. nextElem      10. listInsert    | \n"
            "     |   11. listDelete   12. listTraverse  | \n"
+           "     |   13. switchList   14. saveToFile    | \n"
+           "     |   15. loadFromFile                   | \n"
            "     |                                      | \n"
            "    ------------------------------------------\n\n");
 }
@@ -204,4 +269,50 @@ Status printElement(ElemType *e)
 {
     printf("%d->", e->value);
     return OK;
+}
+
+Status saveToFile(SqList *list)
+{
+    FILE *fp = fopen("./list.txt", "w");
+    if (fp == NULL)
+        fp = fopen("./list.txt", "wb");
+
+    if (!list->elem)
+        return ERROR;
+
+    fprintf(fp, "%d\n", list->length);
+    fprintf(fp, "%d\n", list->listSize);
+    for (int i = 0; i < listLength(*list); i++)
+        fprintf(fp, "%d,", list->elem[i].value);
+    fclose(fp);
+    return OK;
+}
+
+Status loadFromFile(SqList *list)
+{
+    FILE *fp = fopen("./list.txt", "r");
+    if (fp == NULL)
+    {
+        printf("File doesn't exist\n");
+        return ERROR;
+    }
+    Status result = initList(list);
+    if (result == ERROR)
+    {
+        printf("list has been initialized before\n");
+        fclose(fp);
+        return ERROR;
+    }
+    else
+    {
+        ElemType element;
+        int i = 1;
+        int length, listSize;
+        fscanf(fp, "%d\n", &length);
+        fscanf(fp, "%d\n", &listSize);
+        for (int i = 1; fscanf(fp, "%d,", &element.value) != EOF; i++)
+            listInsert(list, i, element);
+        fclose(fp);
+        return OK;
+    }
 }
