@@ -62,7 +62,8 @@ int main(void)
         }
         else
         {
-            clearBuf();
+            if (option)
+                clearBuf();
             switch (option)
             {
             case 0:
@@ -203,6 +204,32 @@ int main(void)
                 curList = listTable + listIndex;
                 clearBuf();
                 break;
+            case 14:
+                printf("Choose a list to save:\n");
+                if (!scanf("%d", &inputValue) || inputValue > LIST_TABLE_SIZE || inputValue < 1)
+                {
+                    printf("[Error]: Invalid value\n");
+                    clearBuf();
+                    break;
+                }
+                status = saveToFile(&listTable[inputValue - 1]);
+                printf(status == OK ? "[Info]: Saved successfully\n"
+                                    : "[Error]: Failed to save\n");
+                clearBuf();
+                break;
+            case 15:
+                printf("Choose a list to save the date from a file:\n");
+                if (!scanf("%d", &inputValue) || inputValue > LIST_TABLE_SIZE || inputValue < 1)
+                {
+                    printf("[Error]: Invalid value\n");
+                    clearBuf();
+                    break;
+                }
+                status = loadFromFile(&listTable[inputValue - 1]);
+                printf(status == OK ? "[Info]: Loaded successfully\n"
+                                    : "[Error]: Failed to load\n");
+                clearBuf();
+                break;
             default:
                 break;
             }
@@ -210,8 +237,8 @@ int main(void)
         clearBuf();
         system("cls");
     } while (option);
-    // printf("\nDone!\n");
-    // getchar();
+    printf("\nDone!\n");
+    getchar();
     return 0;
 }
 
@@ -244,18 +271,47 @@ void printElement(LinkNode *node)
     printf("%d->", node->data);
 }
 
-// Status saveToFile(LinkList *list)
-// {
-//     FILE *fp = fopen("./list.txt", "w");
-//     if (fp == NULL)
-//         fp = fopen("./list.txt", "wb");
+Status saveToFile(LinkList *list)
+{
+    if (!list->initialized)
+        return ERROR;
 
-//     if (!list->initialized)
-//         return ERROR;
+    FILE *fp = fopen("./list.txt", "w");
+    if (fp == NULL)
+        fp = fopen("./list.txt", "wb");
 
-//     fprintf(fp, "%d\n", list->length);
-//     for (int i = 0; i < listLength(*list); i++)
-//         fprintf(fp, "%d,", list->elem[i].value);
-//     fclose(fp);
-//     return OK;
-// }
+    ElemType temp;
+    for (int i = 0; i < listLength(*list); i++)
+    {
+        getElem(*list, i + 1, &temp);
+        fprintf(fp, "%d,", temp);
+    }
+    fclose(fp);
+    return OK;
+}
+
+Status loadFromFile(LinkList *list)
+{
+    FILE *fp = fopen("./list.txt", "r");
+    if (fp == NULL)
+    {
+        printf("[Error]: File doesn't exist\n");
+        return ERROR;
+    }
+    Status result = initList(list);
+    if (result == ERROR)
+    {
+        printf("[Info]: list has been initialized before\n");
+        fclose(fp);
+        return ERROR;
+    }
+    else
+    {
+        ElemType element;
+        int i = 1;
+        for (; fscanf(fp, "%d,", &element) != EOF; i++)
+            listInsert(list, i, element);
+        fclose(fp);
+        return OK;
+    }
+}
