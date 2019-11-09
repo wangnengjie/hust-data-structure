@@ -1,8 +1,8 @@
 #pragma once
 
 #include <stdbool.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 typedef int Status;
@@ -22,3 +22,11 @@ typedef struct ElemType
     char key[MAX_KEY_LENGTH];
     int value;
 } ElemType;
+
+/**
+ * @description: comparing function
+ * @param {ElemType} - elem
+ * @param {ElemType} - elem
+ * @return {bool}
+ */
+bool isEqual(ElemType, ElemType);

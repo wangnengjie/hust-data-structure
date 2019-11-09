@@ -81,11 +81,6 @@ int locateElem(LinkList list, ElemType e, bool (*compare)(ElemType, ElemType))
     return i > listLength(list) ? 0 : i;
 }
 
-bool isEqual(ElemType e1, ElemType e2)
-{
-    return strcmp(e1.key, e2.key) == 0;
-}
-
 Status priorElem(LinkList list, ElemType cur, ElemType *pre)
 {
     if (!list.initialized)

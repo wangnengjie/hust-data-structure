@@ -1,7 +1,7 @@
 #pragma once
 
 #include "LinkList.h"
-#include "CommonType.h"
+#include "global.h"
 
 typedef LinkList Queue;
 

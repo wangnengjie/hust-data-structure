@@ -1,7 +1,7 @@
 #pragma once
 
-#include "CommonType.h"
 #include "LinkList.h"
+#include "global.h"
 
 typedef LinkList Stack;
 
@@ -46,4 +46,4 @@ Status pushStack(Stack *, ElemType);
  * @param {Stack *} - point to a Stack
  * @return {ElemType *} - the first node
  */
-ElemType *frontStack(Stack *);
+ElemType *topStack(Stack *);

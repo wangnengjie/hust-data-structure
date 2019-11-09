@@ -1,19 +1,10 @@
 #include "Queue.h"
 
-Status initQueue(Queue *queue)
-{
-    return initList(queue);
-}
+Status initQueue(Queue *queue) { return initList(queue); }
 
-Status destroyQueue(Queue *queue)
-{
-    return destroyList(queue);
-}
+Status destroyQueue(Queue *queue) { return destroyList(queue); }
 
-Status clearQueue(Queue *queue)
-{
-    return clearList(queue);
-}
+Status clearQueue(Queue *queue) { return clearList(queue); }
 
 Status popQueue(Queue *queue)
 {
@@ -26,7 +17,4 @@ Status pushQueue(Queue *queue, ElemType e)
     return listInsert(queue, listLength(*queue) + 1, e);
 }
 
-ElemType *frontQueue(Queue *queue)
-{
-    return queue->head;
-}
+ElemType *frontQueue(Queue *queue) { return &queue->head->data; }

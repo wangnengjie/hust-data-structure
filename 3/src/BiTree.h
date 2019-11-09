@@ -1,16 +1,10 @@
 #pragma once
 
-#include "CommonType.h"
+#include "global.h"
 
-typedef struct TreeNode
+typedef struct BiTNode
 {
     ElemType data;
-    TreeNode *leftChild;
-    TreeNode *rightChild;
-} TreeNode;
-
-typedef struct BiTree
-{
-    TreeNode *root;
-} BiTree;
-
+    BiTNode *leftChild;
+    BiTNode *rightChild;
+} BiTNode, *BiTree;

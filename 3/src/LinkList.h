@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CommonType.h"
+#include "global.h"
 
 typedef struct LinkNode
 {
@@ -38,14 +38,14 @@ Status clearList(LinkList *);
 
 /**
  * @description: whether a list is empty
- * @param {LinkList} - a list 
+ * @param {LinkList} - a list
  * @return {bool}
  */
 bool listEmpty(LinkList);
 
 /**
  * @description: a list'length
- * @param {LinkList} - a list 
+ * @param {LinkList} - a list
  * @return {int}
  */
 int listLength(LinkList);
@@ -67,14 +67,6 @@ Status getElem(LinkList, int, ElemType *);
  * @return {int} - the index of elem
  */
 int locateElem(LinkList, ElemType, bool (*compare)(ElemType, ElemType));
-
-/**
- * @description: comparing function
- * @param {ElemType} - elem
- * @param {ElemType} - elem
- * @return {bool}
- */
-bool isEqual(ElemType, ElemType);
 
 /**
  * @description: get element's previous element
@@ -104,7 +96,8 @@ Status nextElem(LinkList, ElemType, ElemType *);
 Status listInsert(LinkList *, int, ElemType);
 
 /**
- * @description: delete an element from a list by index and return it by param third
+ * @description: delete an element from a list by index and return it by param
+ * third
  * @param {LinkList *} - pointer to list
  * @param {int} - index of element to be deleted
  * @param {ElemType *} - the element to be deleted
