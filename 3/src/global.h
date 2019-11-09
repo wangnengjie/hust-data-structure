@@ -12,11 +12,6 @@ typedef int Status;
 
 #define MAX_KEY_LENGTH 20
 
-#define PRE_ORDER 1
-#define IN_ORDER 2
-#define POST_ORDER 3
-#define LEVEL_ORDER 4
-
 typedef struct ElemType
 {
     char key[MAX_KEY_LENGTH];
