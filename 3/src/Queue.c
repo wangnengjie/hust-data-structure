@@ -10,7 +10,7 @@ bool queueEmpty(Queue *queue) { return listEmpty(*queue); }
 
 Status queuePop(Queue *queue)
 {
-    ElemType temp;
+    ElemType temp = NULL;
     return listDelete(queue, 1, &temp);
 }
 

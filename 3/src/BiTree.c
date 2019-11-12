@@ -1,33 +1,32 @@
+#define _CRT_SECURE_NO_WARNINGS
+
 #include "BiTree.h"
 #include "Queue.h"
 #include "Stack.h"
 
 Status CreateBiTree(BiTree *T, LinkList *list)
 {
-    if (T)
+    if (T->initialized)
         return ERROR;
-    T = (BiTree *)malloc(sizeof(BiTree));
-    if (!T)
-        return OVERFLOW;
-    T->root = NULL;
-    CreateFunc(T->root, list);
+    T->initialized = true;
+    T->root = CreateFunc(list);
     return OK;
 }
 
-void CreateFunc(BiTNode *root, LinkList *list)
+BiTNode *CreateFunc(LinkList *list)
 {
     if (listEmpty(*list))
-        return;
-    BiTNode *node = NULL;
+        return NULL;
+    BiTNode *node = (BiTNode *)malloc(sizeof(BiTNode));
     if (!list->head->data) // empty node
     {
         listDelete(list, 1, &node);
-        return;
+        return NULL;
     }
     listDelete(list, 1, &node);
-    root = node;
-    CreateFunc(root->leftChild, list);
-    CreateFunc(root->rightChild, list);
+    node->leftChild = CreateFunc(list);
+    node->rightChild = CreateFunc(list);
+    return node;
 }
 
 Status DestroyBiTree(BiTree *T)
@@ -35,14 +34,13 @@ Status DestroyBiTree(BiTree *T)
     Status t = ClearBiTree(T);
     if (t != OK)
         return t;
-    free(T);
-    T = NULL;
+    T->initialized = false;
     return OK;
 }
 
 Status ClearBiTree(BiTree *T)
 {
-    if (!T)
+    if (!T->initialized)
         return ERROR;
     PostOrderTraverse(T->root, (void (*)(BiTNode *))free);
     T->root = NULL;
@@ -51,14 +49,14 @@ Status ClearBiTree(BiTree *T)
 
 bool BiTreeEmpty(BiTree *T)
 {
-    if (!T)
+    if (!T->initialized)
         return ERROR;
     return T->root == NULL ? true : false;
 }
 
 int BiTreeDepth(BiTree *T)
 {
-    if (!T)
+    if (!T->initialized)
         return ERROR;
     return GetDepthFunc(T->root);
 }
@@ -74,7 +72,7 @@ int GetDepthFunc(BiTNode *root)
 
 BiTNode *LocateNode(BiTree *T, char *key)
 {
-    if (!T)
+    if (!T->initialized)
         return NULL;
     return LocateNodeFunc(T->root, key);
 }
@@ -97,7 +95,7 @@ BiTNode *LocateNodeFunc(BiTNode *root, char *key)
 
 Status Assign(BiTree *T, char *key, int value)
 {
-    if (!T)
+    if (!T->initialized)
         return ERROR;
     BiTNode *t = LocateNodeFunc(T->root, key);
     if (!t)
@@ -108,7 +106,7 @@ Status Assign(BiTree *T, char *key, int value)
 
 BiTNode *GetSibling(BiTree *T, char *key)
 {
-    if (!T)
+    if (!T->initialized)
         return NULL;
     BiTNode *parent = GetParentFunc(T->root, key);
     if (!parent)
@@ -134,7 +132,7 @@ BiTNode *GetParentFunc(BiTNode *root, char *key)
 
 Status InsertNode(BiTree *T, char *key, enum LR L_R, BiTNode *node)
 {
-    if (!T)
+    if (!T->initialized)
         return ERROR;
     BiTNode *subroot = LocateNodeFunc(T->root, key);
     if (!subroot)
@@ -159,7 +157,7 @@ Status InsertNode(BiTree *T, char *key, enum LR L_R, BiTNode *node)
 
 Status DeleteNode(BiTree *T, char *key)
 {
-    if (!T)
+    if (!T->initialized)
         return ERROR;
     BiTNode *toDelete = NULL;
     // root node to delete
@@ -188,11 +186,28 @@ Status DeleteNode(BiTree *T, char *key)
             parent->leftChild = toDelete->leftChild;
         else // both has subtree
         {
+            BiTNode *p = toDelete->leftChild;
+            for (; p->rightChild; p = p->rightChild)
+                ;
+            p->rightChild = toDelete->rightChild;
+            parent->leftChild = toDelete->leftChild;
         }
     }
     else
     {
         toDelete = parent->rightChild;
+        if (!toDelete->leftChild)
+            parent->rightChild = toDelete->rightChild;
+        else if (!toDelete->rightChild)
+            parent->rightChild = toDelete->leftChild;
+        else
+        {
+            BiTNode *p = toDelete->leftChild;
+            for (; p->rightChild; p = p->rightChild)
+                ;
+            p->rightChild = toDelete->rightChild;
+            parent->rightChild = toDelete->leftChild;
+        }
     }
     free(toDelete);
     return OK;
@@ -200,7 +215,7 @@ Status DeleteNode(BiTree *T, char *key)
 
 Status TraverseTree(BiTree *T, enum TraverseType type, void (*visit)(BiTNode *))
 {
-    if (!T)
+    if (!T->initialized)
         return ERROR;
     switch (type)
     {
@@ -226,7 +241,8 @@ Status TraverseTree(BiTree *T, enum TraverseType type, void (*visit)(BiTNode *))
 void PreOrderTraverse(BiTNode *root, void (*visit)(BiTNode *))
 {
     BiTNode *p = root;
-    Stack *s;
+    Stack *s = (Stack *)malloc(sizeof(Stack));
+    s->initialized = false;
     initStack(s);
 
     while (p || !stackEmpty(s))
@@ -244,6 +260,8 @@ void PreOrderTraverse(BiTNode *root, void (*visit)(BiTNode *))
             p = p->rightChild;
         }
     }
+    destroyStack(s);
+    free(s);
 }
 
 void InOrderTraverse(BiTNode *root, void (*visit)(BiTNode *))
@@ -261,7 +279,7 @@ void PostOrderTraverse(BiTNode *root, void (*visit)(BiTNode *))
     if (root)
     {
         PostOrderTraverse(root->leftChild, visit);
-        PostOrderTraverse(root->leftChild, visit);
+        PostOrderTraverse(root->rightChild, visit);
         visit(root);
     }
 }
@@ -270,7 +288,8 @@ void LevelOrderTraverse(BiTNode *root, void (*visit)(BiTNode *))
 {
     if (!root)
         return;
-    Queue *q;
+    Queue *q = (Queue *)malloc(sizeof(Queue));
+    q->initialized = false;
     initQueue(q);
     queuePush(q, root);
     while (!queueEmpty(q))
@@ -278,9 +297,9 @@ void LevelOrderTraverse(BiTNode *root, void (*visit)(BiTNode *))
         BiTNode *cur = queueFront(q);
         queuePop(q);
         visit(cur);
-        if (!cur->leftChild)
+        if (cur->leftChild)
             queuePush(q, cur->leftChild);
-        if (!cur->rightChild)
+        if (cur->rightChild)
             queuePush(q, cur->rightChild);
     }
 }

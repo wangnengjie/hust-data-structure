@@ -10,7 +10,7 @@ bool stackEmpty(Stack *stack) { return listEmpty(*stack); }
 
 Status stackPop(Stack *stack)
 {
-    ElemType temp;
+    ElemType temp = NULL;
     return listDelete(stack, 1, &temp);
 }
 

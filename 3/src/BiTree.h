@@ -6,6 +6,7 @@
 typedef struct BiTree
 {
     BiTNode *root;
+    bool initialized;
 } BiTree;
 
 enum TraverseType
@@ -32,11 +33,10 @@ Status CreateBiTree(BiTree *, LinkList *);
 
 /**
  * @description: func help to create a tree
- * @param {BiTNode *} - root node or sub root node
  * @param {LinkList *} - a node list
- * @return {void}
+ * @return {BiTNode *}
  */
-void CreateFunc(BiTNode *, LinkList *);
+BiTNode *CreateFunc(LinkList *);
 
 /**
  * @description: destroy a binary tree
