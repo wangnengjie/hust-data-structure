@@ -27,11 +27,18 @@ Status destroyQueue(Queue *);
 Status clearQueue(Queue *);
 
 /**
+ * @description:  whether a queue is empty
+ * @param {Queue *} - point to a Queue
+ * @return {bool}
+ */
+bool queueEmpty(Queue *);
+
+/**
  * @description: destory the first node
  * @param {Queue *} - point to a Queue
  * @return {Status}
  */
-Status popQueue(Queue *);
+Status queuePop(Queue *);
 
 /**
  * @description: append a node to tail
@@ -39,11 +46,11 @@ Status popQueue(Queue *);
  * @param {ElemType} - element to push
  * @return {Status}
  */
-Status pushQueue(Queue *, ElemType);
+Status queuePush(Queue *, ElemType);
 
 /**
  * @description: return the first node
  * @param {Queue *} - point to a Queue
- * @return {ElemType *} - the first node
+ * @return {ElemType} - the first node
  */
-ElemType *frontQueue(Queue *);
+ElemType queueFront(Queue *);

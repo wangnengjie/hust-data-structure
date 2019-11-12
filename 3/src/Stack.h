@@ -27,11 +27,18 @@ Status destroyStack(Stack *);
 Status clearStack(Stack *);
 
 /**
+ * @description: whether stack is empty
+ * @param {Stack *} - point to a Stack
+ * @return {bool}
+ */
+bool stackEmpty(Stack *);
+
+/**
  * @description: destory the first node
  * @param {Stack *} - point to a Stack
  * @return {Status}
  */
-Status popStack(Stack *);
+Status stackPop(Stack *);
 
 /**
  * @description: append a node to tail
@@ -39,11 +46,11 @@ Status popStack(Stack *);
  * @param {ElemType} - element to push
  * @return {Status}
  */
-Status pushStack(Stack *, ElemType);
+Status stackPush(Stack *, ElemType);
 
 /**
  * @description: return the first node
  * @param {Stack *} - point to a Stack
- * @return {ElemType *} - the first node
+ * @return {ElemType} - the first node
  */
-ElemType *topStack(Stack *);
+ElemType stackTop(Stack *);

@@ -12,11 +12,18 @@ typedef int Status;
 
 #define MAX_KEY_LENGTH 20
 
-typedef struct ElemType
+typedef struct TElemType
 {
     char key[MAX_KEY_LENGTH];
     int value;
-} ElemType;
+} TElemType;
+
+typedef struct BiTNode
+{
+    TElemType data;
+    struct BiTNode *leftChild;
+    struct BiTNode *rightChild;
+} BiTNode, *ElemType;
 
 /**
  * @description: comparing function
@@ -25,3 +32,11 @@ typedef struct ElemType
  * @return {bool}
  */
 bool isEqual(ElemType, ElemType);
+
+/**
+ * @description: comparing function
+ * @param {ElemType} - elem
+ * @param {char *} - key
+ * @return {bool}
+ */
+bool isEqualByKey(ElemType, char *);
