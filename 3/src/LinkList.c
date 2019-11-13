@@ -3,7 +3,7 @@
 Status listTraverse(LinkList list, void (*visit)(LinkNode *))
 {
     if (!list.initialized)
-        return ERROR;
+        return ERRORS;
     LinkNode *p = list.head;
     while (p)
     {
@@ -17,7 +17,7 @@ Status listTraverse(LinkList list, void (*visit)(LinkNode *))
 Status initList(LinkList *list)
 {
     if (list->initialized)
-        return ERROR;
+        return ERRORS;
     list->head = NULL;
     list->length = 0;
     list->initialized = true;
@@ -27,7 +27,7 @@ Status initList(LinkList *list)
 Status destroyList(LinkList *list)
 {
     if (!list->initialized)
-        return ERROR;
+        return ERRORS;
     listTraverse(*list, free);
     list->length = 0;
     list->initialized = false;
@@ -38,7 +38,7 @@ Status destroyList(LinkList *list)
 Status clearList(LinkList *list)
 {
     if (!list->initialized)
-        return ERROR;
+        return ERRORS;
     listTraverse(*list, free);
     list->length = 0;
     list->head = NULL;
@@ -48,21 +48,21 @@ Status clearList(LinkList *list)
 bool listEmpty(LinkList list)
 {
     if (!list.initialized)
-        return ERROR;
+        return ERRORS;
     return list.length == 0;
 }
 
 int listLength(LinkList list)
 {
     if (!list.initialized)
-        return ERROR;
+        return ERRORS;
     return list.length;
 }
 
 Status getElem(LinkList list, int i, ElemType *e)
 {
     if (!list.initialized || i < 1 || i > list.length)
-        return ERROR;
+        return ERRORS;
     LinkNode *p = list.head;
     for (int j = 1; j < i; j++)
         p = p->next;
@@ -73,7 +73,7 @@ Status getElem(LinkList list, int i, ElemType *e)
 int locateElem(LinkList list, ElemType e, bool (*compare)(ElemType, ElemType))
 {
     if (!list.initialized)
-        return ERROR;
+        return ERRORS;
     LinkNode *p = list.head;
     int i = 1;
     for (; p && !compare(p->data, e); i++, p = p->next)
@@ -84,11 +84,11 @@ int locateElem(LinkList list, ElemType e, bool (*compare)(ElemType, ElemType))
 Status priorElem(LinkList list, ElemType cur, ElemType *pre)
 {
     if (!list.initialized)
-        return ERROR;
+        return ERRORS;
     LinkNode *p1 = list.head;
     LinkNode *p2 = p1->next;
     if (!p1 || !p2 || isEqual(cur, p1->data))
-        return ERROR;
+        return ERRORS;
     for (; p2; p1 = p1->next, p2 = p2->next)
     {
         if (isEqual(p2->data, cur))
@@ -97,13 +97,13 @@ Status priorElem(LinkList list, ElemType cur, ElemType *pre)
             return OK;
         }
     }
-    return ERROR;
+    return ERRORS;
 }
 
 Status nextElem(LinkList list, ElemType cur, ElemType *next)
 {
     if (!list.initialized)
-        return ERROR;
+        return ERRORS;
     for (LinkNode *p1 = list.head; p1; p1 = p1->next)
     {
         if (isEqual(p1->data, cur))
@@ -116,13 +116,13 @@ Status nextElem(LinkList list, ElemType cur, ElemType *next)
             }
         }
     }
-    return ERROR;
+    return ERRORS;
 }
 
 Status listInsert(LinkList *list, int i, ElemType value)
 {
     if (!list->initialized || i < 1 || i > list->length + 1)
-        return ERROR;
+        return ERRORS;
     LinkNode *newNode = (LinkNode *)malloc(sizeof(LinkNode));
     if (!newNode)
         return OVERFLOW;
@@ -148,7 +148,7 @@ Status listInsert(LinkList *list, int i, ElemType value)
 Status listDelete(LinkList *list, int i, ElemType *e)
 {
     if (!list->initialized || i < 1 || i > list->length)
-        return ERROR;
+        return ERRORS;
     LinkNode *p = list->head;
     LinkNode *deleteNode = NULL;
     if (i == 1)

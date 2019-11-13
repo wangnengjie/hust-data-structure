@@ -14,8 +14,9 @@ int calc(BiTNode *node, bool isLeft, int offset, int depth, char **buffer)
         digits++;
     }
     int width = 2 + digits;
+    width += strlen(node->data.key) + 1;
     // insert to buffer
-    sprintf(b, "(%d)", node->data.value);
+    sprintf(b, "(%s %d)", node->data.key, node->data.value);
 
     // width of left child
     int left = calc(node->leftChild, 1, offset, depth + 1, buffer);
@@ -66,7 +67,7 @@ Status create(BiTree *T, int height, int width)
     if (finalWidth > width)
     { // width exceeds
         printf("[WARNING: The width of console CANNOT show the whole tree!]\n");
-        return ERROR;
+        return ERRORS;
     }
 
     for (int i = 0; i < height; i++)
@@ -81,7 +82,7 @@ Status create(BiTree *T, int height, int width)
 Status printTree(BiTree *T)
 {
     if (!T->initialized)
-        return ERROR;
+        return ERRORS;
 
     int consoleWidth;
     // get console width
@@ -96,7 +97,7 @@ Status printTree(BiTree *T)
 
     Status status = create(T, height, consoleWidth);
     if (status != OK)
-        return ERROR;
+        return ERRORS;
 
     printf("\n");
     return OK;

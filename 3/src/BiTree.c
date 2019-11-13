@@ -7,7 +7,7 @@
 Status CreateBiTree(BiTree *T, LinkList *list)
 {
     if (T->initialized)
-        return ERROR;
+        return ERRORS;
     T->initialized = true;
     T->root = CreateFunc(list);
     return OK;
@@ -41,7 +41,7 @@ Status DestroyBiTree(BiTree *T)
 Status ClearBiTree(BiTree *T)
 {
     if (!T->initialized)
-        return ERROR;
+        return ERRORS;
     PostOrderTraverse(T->root, (void (*)(BiTNode *))free);
     T->root = NULL;
     return OK;
@@ -50,14 +50,14 @@ Status ClearBiTree(BiTree *T)
 bool BiTreeEmpty(BiTree *T)
 {
     if (!T->initialized)
-        return ERROR;
+        return ERRORS;
     return T->root == NULL ? true : false;
 }
 
 int BiTreeDepth(BiTree *T)
 {
     if (!T->initialized)
-        return ERROR;
+        return ERRORS;
     return GetDepthFunc(T->root);
 }
 
@@ -96,10 +96,10 @@ BiTNode *LocateNodeFunc(BiTNode *root, char *key)
 Status Assign(BiTree *T, char *key, int value)
 {
     if (!T->initialized)
-        return ERROR;
+        return ERRORS;
     BiTNode *t = LocateNodeFunc(T->root, key);
     if (!t)
-        return ERROR;
+        return ERRORS;
     t->data.value = value;
     return OK;
 }
@@ -133,10 +133,13 @@ BiTNode *GetParentFunc(BiTNode *root, char *key)
 Status InsertNode(BiTree *T, char *key, enum LR L_R, BiTNode *node)
 {
     if (!T->initialized)
-        return ERROR;
+        return ERRORS;
+    if (LocateNodeFunc(T->root, node->data.key) != NULL)
+        return ERRORS;
+
     BiTNode *subroot = LocateNodeFunc(T->root, key);
     if (!subroot)
-        return ERROR;
+        return ERRORS;
     BiTNode *temp = NULL;
     if (L_R == LEFT)
     {
@@ -151,14 +154,14 @@ Status InsertNode(BiTree *T, char *key, enum LR L_R, BiTNode *node)
         node->rightChild = temp;
     }
     else
-        return ERROR;
+        return ERRORS;
     return OK;
 }
 
 Status DeleteNode(BiTree *T, char *key)
 {
     if (!T->initialized)
-        return ERROR;
+        return ERRORS;
     BiTNode *toDelete = NULL;
     // root node to delete
     if (isEqualByKey(T->root, key))
@@ -175,7 +178,7 @@ Status DeleteNode(BiTree *T, char *key)
     // other node
     BiTNode *parent = GetParentFunc(T->root, key);
     if (!parent)
-        return ERROR;
+        return ERRORS;
 
     if (isEqualByKey(parent->leftChild, key))
     {
@@ -216,7 +219,7 @@ Status DeleteNode(BiTree *T, char *key)
 Status TraverseTree(BiTree *T, enum TraverseType type, void (*visit)(BiTNode *))
 {
     if (!T->initialized)
-        return ERROR;
+        return ERRORS;
     switch (type)
     {
     case PRE_ORDER:
@@ -232,7 +235,7 @@ Status TraverseTree(BiTree *T, enum TraverseType type, void (*visit)(BiTNode *))
         LevelOrderTraverse(T->root, visit);
         break;
     default:
-        return ERROR;
+        return ERRORS;
         break;
     }
     return OK;
@@ -253,6 +256,7 @@ void PreOrderTraverse(BiTNode *root, void (*visit)(BiTNode *))
             stackPush(s, p);
             p = p->leftChild;
         }
+        visit(p); // visit empty node
         if (!stackEmpty(s))
         {
             p = stackTop(s);
