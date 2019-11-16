@@ -1,25 +1,47 @@
+#pragma once
+
+#include <algorithm>
 #include <list>
+#include <stdexcept>
 #include <string>
+#include <unordered_set>
 
 using std::list;
 using std::string;
 
-// 弧节点
-template <typename E> class Arc
+template <typename E>
+class IArc
+{
+  public:
+    string Fkey;
+    string Tkey;
+    E info;
+
+    IArc(const string &from, const string &to, E &&elem)
+        : Fkey(from), Tkey(to), info(elem){};
+};
+
+template <typename E>
+class Arc
 {
   private:
-    string _key; // 弧指向的顶点的key
-    E _info;     // 弧上信息类
+    string _key;
+    E _info;
 
   public:
     Arc() = delete;
-    Arc(string key, E elem) : _key(key), _info(elem){};
-    const E &getInfo() { return _info; };
-    void setInfo(E nInfo) { _info = nInfo; };
+
+    Arc(string &key, E &&elem) : _key(key), _info(elem){};
+
+    auto getKey() -> const string & { return _key; };
+
+    auto getInfo() -> const E & { return _info; };
+
+    void setInfo(E &&nInfo) { _info = nInfo; };
 };
 
-// 顶点
-template <typename V, typename E> class Vertex
+template <typename V, typename E>
+class Vertex
 {
   private:
     string _key;
@@ -28,21 +50,153 @@ template <typename V, typename E> class Vertex
 
   public:
     Vertex() = delete;
-    Vertex(string key, V elem, list<Arc<E>> firstArc = list<Arc<E>>())
-        : _key(key), _info(elem), _arcList(firstArc){};
-    const V &getInfo() { return _info; };
-    void setInfo(V nInfo) { _info = nInfo; };
+
+    Vertex(const string &key, V &&elem) : _key(key), _info(elem){};
+
+    auto getInfo() -> const V & { return _info; };
+
+    auto getAList() -> list<Arc<E>> & { return _arcList; };
+
+    auto getKey() -> const string & { return _key; };
+
+    void setInfo(V &&nInfo) { _info = nInfo; };
+
+    void addArc(Arc<E> &&newArc);
+
+    void deleteArc(const string &target);
 };
 
-// 有向图
-template <typename V, typename E> class Graph
+template <typename V, typename E>
+class Graph
 {
+
   private:
     int _vexnum, _arcnum;
     list<Vertex<V, E>> _vertexList;
 
   public:
     Graph() : _vexnum(0), _arcnum(0){};
-    Graph(list<Vertex<V, E>> vertexList, list<Arc<E>> arcList)
-        : _vertexList(vertexList){};
+
+    Graph(list<Vertex<V, E>> &vertexList, list<IArc<E>> &arcList);
+
+    auto locateVex(const string &key) -> Vertex<V, E> *;
+
+    void putVex(const string &key, V &&elem);
+
+    auto firstAdjVex(const string &key) -> Vertex<V, E> *;
+
+    auto nextAdjVex(const string &v, const string &w) -> Vertex<V, E> *;
 };
+
+class create_graph_error : public std::logic_error
+{
+  public:
+    explicit create_graph_error(const string &s) : std::logic_error(s){};
+};
+
+template <typename V, typename E>
+void Vertex<V, E>::addArc(Arc<E> &&newArc)
+{
+    auto pos =
+        std::find_if(_arcList.begin(), _arcList.end(), [&newArc](Arc<E> &arc) {
+            return newArc.getKey() == arc.getKey();
+        });
+    if (_arcList.end() != pos)
+        throw std::logic_error("[Error]: Arc has existed!");
+    else
+        _arcList.push_back(newArc);
+}
+
+template <typename V, typename E>
+void Vertex<V, E>::deleteArc(const string &target)
+{
+    auto pos =
+        std::find_if(_arcList.begin(), _arcList.end(),
+                     [&target](Arc<E> &arc) { return target == arc.getKey(); });
+    if (_arcList.end() == pos)
+        throw std::logic_error("[Error]: Arc does not exist!");
+    else
+        _arcList.erase(pos);
+}
+
+template <typename V, typename E>
+Graph<V, E>::Graph(list<Vertex<V, E>> &vertexList, list<IArc<E>> &arcList)
+{
+    std::unordered_set<string> keySet;
+    for (Vertex<V, E> &v : vertexList)
+    {
+        if (keySet.find(v.getKey()) == keySet.end())
+            keySet.insert(v.getKey());
+        else
+            throw create_graph_error(
+                "[Error]: Your input vertices have duplicate key: " +
+                v.getKey() + " !");
+    }
+    _vertexList = vertexList;
+    _vexnum = static_cast<int>(vertexList.size());
+    for (auto &arc : arcList)
+    {
+        auto pos = locateVex(arc.Fkey);
+        if (pos == nullptr)
+            throw create_graph_error("[Error]: Vertex key " + arc.Fkey +
+                                     " does not exist!");
+        try
+        {
+            pos->addArc(Arc<E>(arc.Tkey, std::move(arc.info)));
+        }
+        catch (const std::logic_error &e)
+        {
+            throw create_graph_error(e.what());
+        }
+    }
+    _arcnum = static_cast<int>(arcList.size());
+}
+
+template <typename V, typename E>
+auto Graph<V, E>::locateVex(const string &key) -> Vertex<V, E> *
+{
+    for (auto be = _vertexList.begin(); be != _vertexList.end(); be++)
+    {
+        if (be->getKey() == key)
+            return &(*be);
+    }
+    return nullptr;
+}
+
+template <typename V, typename E>
+void Graph<V, E>::putVex(const string &key, V &&elem)
+{
+    Vertex<V, E> *pos = locateVex(key);
+    if (pos == nullptr)
+        throw std::logic_error("[Error]: Vertex " + key + " does not exist!");
+    pos->setInfo(std::move(elem));
+}
+
+template <typename V, typename E>
+auto Graph<V, E>::firstAdjVex(const string &key) -> Vertex<V, E> *
+{
+    Vertex<V, E> *pos = locateVex(key);
+    if (pos == nullptr)
+        throw std::logic_error("[Error]: Vertex " + key + " does not exist!");
+    if (pos->getAList().empty())
+        throw std::logic_error("[Error]: Vertex " + key +
+                               " does not have adjVex");
+    auto &firstArc = pos->getAList().front();
+    return locateVex(firstArc.getKey());
+}
+
+template <typename V, typename E>
+auto Graph<V, E>::nextAdjVex(const string &v, const string &w) -> Vertex<V, E> *
+{
+    Vertex<V, E> *pos = locateVex(v);
+    if (pos == nullptr)
+        throw std::logic_error("[Error]: Vertex " + v + " does not exist!");
+    auto &AList = pos->getAList();
+    auto PToW = std::find_if(AList.begin(), AList.end(),
+                             [&w](Arc<E> &arc) { return arc.getKey() == w; });
+    if (PToW == AList.end())
+        throw std::logic_error("[Error]: Vertex " + w + " does not exist!");
+    if (++PToW == AList.end())
+        return nullptr;
+    return locateVex(PToW->getKey());
+}
