@@ -1,10 +1,10 @@
 #pragma once
-
 #include <algorithm>
 #include <list>
 #include <stdexcept>
 #include <string>
 #include <unordered_set>
+#include <utility>
 
 using std::list;
 using std::string;
@@ -17,8 +17,8 @@ class IArc
     string Tkey;
     E info;
 
-    IArc(const string &from, const string &to, E &&elem)
-        : Fkey(from), Tkey(to), info(elem){};
+    IArc(string from, string to, E &&elem)
+        : Fkey(std::move(from)), Tkey(std::move(to)), info(elem){};
 };
 
 template <typename E>
@@ -31,7 +31,7 @@ class Arc
   public:
     Arc() = delete;
 
-    Arc(string &key, E &&elem) : _key(key), _info(elem){};
+    Arc(string key, E &&elem) : _key(std::move(key)), _info(elem){};
 
     auto getKey() -> const string & { return _key; };
 
@@ -51,7 +51,7 @@ class Vertex
   public:
     Vertex() = delete;
 
-    Vertex(const string &key, V &&elem) : _key(key), _info(elem){};
+    Vertex(string key, V &&elem) : _key(std::move(key)), _info(elem){};
 
     auto getInfo() -> const V & { return _info; };
 
@@ -71,15 +71,14 @@ class Graph
 {
 
   private:
-    int _vexnum, _arcnum;
+    int _vexnum{0};
+    int _arcnum{0};
     list<Vertex<V, E>> _vertexList;
 
   public:
-    Graph() : _vexnum(0), _arcnum(0){};
-
     Graph(list<Vertex<V, E>> &vertexList, list<IArc<E>> &arcList);
 
-    auto locateVex(const string &key) -> Vertex<V, E> *;
+    Vertex<V, E> *locateVex(const string &key);
 
     void putVex(const string &key, V &&elem);
 
@@ -102,9 +101,10 @@ void Vertex<V, E>::addArc(Arc<E> &&newArc)
             return newArc.getKey() == arc.getKey();
         });
     if (_arcList.end() != pos)
+    {
         throw std::logic_error("[Error]: Arc has existed!");
-    else
-        _arcList.push_back(newArc);
+    }
+    _arcList.push_back(newArc);
 }
 
 template <typename V, typename E>
@@ -114,9 +114,10 @@ void Vertex<V, E>::deleteArc(const string &target)
         std::find_if(_arcList.begin(), _arcList.end(),
                      [&target](Arc<E> &arc) { return target == arc.getKey(); });
     if (_arcList.end() == pos)
+    {
         throw std::logic_error("[Error]: Arc does not exist!");
-    else
-        _arcList.erase(pos);
+    }
+    _arcList.erase(pos);
 }
 
 template <typename V, typename E>
@@ -126,11 +127,15 @@ Graph<V, E>::Graph(list<Vertex<V, E>> &vertexList, list<IArc<E>> &arcList)
     for (Vertex<V, E> &v : vertexList)
     {
         if (keySet.find(v.getKey()) == keySet.end())
+        {
             keySet.insert(v.getKey());
+        }
         else
+        {
             throw create_graph_error(
                 "[Error]: Your input vertices have duplicate key: " +
                 v.getKey() + " !");
+        }
     }
     _vertexList = vertexList;
     _vexnum = static_cast<int>(vertexList.size());
@@ -138,8 +143,10 @@ Graph<V, E>::Graph(list<Vertex<V, E>> &vertexList, list<IArc<E>> &arcList)
     {
         auto pos = locateVex(arc.Fkey);
         if (pos == nullptr)
+        {
             throw create_graph_error("[Error]: Vertex key " + arc.Fkey +
                                      " does not exist!");
+        }
         try
         {
             pos->addArc(Arc<E>(arc.Tkey, std::move(arc.info)));
@@ -158,7 +165,9 @@ auto Graph<V, E>::locateVex(const string &key) -> Vertex<V, E> *
     for (auto be = _vertexList.begin(); be != _vertexList.end(); be++)
     {
         if (be->getKey() == key)
+        {
             return &(*be);
+        }
     }
     return nullptr;
 }
@@ -168,7 +177,9 @@ void Graph<V, E>::putVex(const string &key, V &&elem)
 {
     Vertex<V, E> *pos = locateVex(key);
     if (pos == nullptr)
+    {
         throw std::logic_error("[Error]: Vertex " + key + " does not exist!");
+    }
     pos->setInfo(std::move(elem));
 }
 
@@ -177,10 +188,14 @@ auto Graph<V, E>::firstAdjVex(const string &key) -> Vertex<V, E> *
 {
     Vertex<V, E> *pos = locateVex(key);
     if (pos == nullptr)
+    {
         throw std::logic_error("[Error]: Vertex " + key + " does not exist!");
+    }
     if (pos->getAList().empty())
+    {
         throw std::logic_error("[Error]: Vertex " + key +
                                " does not have adjVex");
+    }
     auto &firstArc = pos->getAList().front();
     return locateVex(firstArc.getKey());
 }
@@ -190,13 +205,20 @@ auto Graph<V, E>::nextAdjVex(const string &v, const string &w) -> Vertex<V, E> *
 {
     Vertex<V, E> *pos = locateVex(v);
     if (pos == nullptr)
+    {
         throw std::logic_error("[Error]: Vertex " + v + " does not exist!");
+    }
     auto &AList = pos->getAList();
-    auto PToW = std::find_if(AList.begin(), AList.end(),
-                             [&w](Arc<E> &arc) { return arc.getKey() == w; });
+    typename list<Arc<E>>::iterator PToW =
+        std::find_if(AList.begin(), AList.end(),
+                     [&w](Arc<E> &arc) { return arc.getKey() == w; });
     if (PToW == AList.end())
+    {
         throw std::logic_error("[Error]: Vertex " + w + " does not exist!");
+    }
     if (++PToW == AList.end())
+    {
         return nullptr;
+    }
     return locateVex(PToW->getKey());
 }

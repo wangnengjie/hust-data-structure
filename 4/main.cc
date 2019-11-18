@@ -1,4 +1,4 @@
-#include "src\Graph.hh"
+#include "Graph.hh"
 #include <iostream>
 auto main() -> int
 {
@@ -13,8 +13,14 @@ auto main() -> int
         aList.emplace_back("asdasd", "hzytql", "aaaa");
         Graph<string, string> myGraph(vList, aList);
         auto p = myGraph.nextAdjVex("asdasd", "dfis");
-        std::cout << (p == nullptr) << std::endl;
-        std::cout << p->getKey() << std::endl;
+        if (p == nullptr)
+        {
+            std::cout << (p == nullptr) << std::endl;
+        }
+        else
+        {
+            std::cout << p->getKey() << std::endl;
+        }
     }
     catch (create_graph_error &e)
     {
@@ -24,6 +30,5 @@ auto main() -> int
     {
         std::cout << e.what() << std::endl;
     }
-
     return 0;
 }

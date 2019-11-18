@@ -5,3 +5,5 @@
 *.pdb
 *.txt
 *.docx
+cmake-build-debug
+.idea
