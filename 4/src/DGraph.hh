@@ -26,21 +26,25 @@ class DGraph
   public:
     auto getVexNum() const { return vexNum; };
     auto getEdgeNum() const { return edgeNum; };
-    auto getVListBeg() -> typename list<Vertex<V, E>>::iterator { return vertexList.begin(); };
-    auto getVListEnd() -> typename list<Vertex<V, E>>::iterator { return vertexList.end(); };
-    auto locateVex(const string &key) -> typename list<Vertex<V, E>>::iterator;
+    auto getVListBeg() const -> typename list<Vertex<V, E>>::const_iterator
+    {
+        return vertexList.cbegin();
+    };
+    auto getVListEnd() const -> typename list<Vertex<V, E>>::const_iterator
+    {
+        return vertexList.cend();
+    };
+    auto locateVex(const string &key) const -> typename list<Vertex<V, E>>::const_iterator;
+
+  private:
+    auto locateVertex(const string &key) -> typename list<Vertex<V, E>>::iterator;
 
   public:
-    void putVex(const string &key, V &&value);
-    void putVex(const string &key, const V &value);
+    void putVex(const string &key, V &&value) const;
+    void putVex(const string &key, const V &value) const;
     void insertVex(Vertex<V, E> &&newVex);
     void insertVex(const Vertex<V, E> &newVex);
     void deleteVex(const string &key);
-
-  public:
-    auto firstAdjVex(const string &key) -> typename list<Vertex<V, E>>::iterator;
-    auto nextAdjVex(const string &key, const string &refKey) ->
-        typename list<Vertex<V, E>>::iterator;
 
   public:
     void insertEdge(Edge<E> &&edge);
@@ -48,12 +52,17 @@ class DGraph
     void deleteEdge(const string &fromKey, const string &toKey);
 
   public:
+    auto firstAdjVex(const string &key) const -> typename list<Vertex<V, E>>::const_iterator;
+    auto nextAdjVex(const string &key, const string &refKey) const ->
+        typename list<Vertex<V, E>>::const_iterator;
+
+  public:
     void DFSTraverse(std::function<void(const Vertex<V, E> &)> f) const;
     void BFSTraverse(std::function<void(const Vertex<V, E> &)> f) const;
 
   private:
-    void dfs(Vertex<V, E> &v, std::unordered_set<string> &keySet,
-             std::function<void(const Vertex<V, E> &)> f);
+    void dfs(const Vertex<V, E> &v, std::unordered_set<string> &keySet,
+             std::function<void(const Vertex<V, E> &)> f) const;
 };
 
 template <typename V, typename E>
@@ -76,10 +85,15 @@ DGraph<V, E>::DGraph(const list<Vertex<V, E>> &VList, const list<Edge<E>> &EList
 
     for (const Edge<E> &edge : EList)
     {
-        auto VPos = locateVex(edge.getFrom());
-        if (VPos == VList.end())
+        auto VPos = locateVertex(edge.getFrom());
+        auto VPosTo = locateVertex(edge.getTo());
+        if (VPos == getVListEnd())
         {
             throw create_graph_error("[Error]: Vertex<" + edge.getFrom() + "> does not exist");
+        }
+        if (VPosTo == getVListEnd())
+        {
+            throw create_graph_error("[Error]: Vertex<" + edge.getTo() + "> does not exist");
         }
         auto EPos = VPos->locateEdge(edge.getTo());
         if (EPos != VPos->getEListEnd())
@@ -94,14 +108,21 @@ DGraph<V, E>::DGraph(const list<Vertex<V, E>> &VList, const list<Edge<E>> &EList
 }
 
 template <typename V, typename E>
-auto DGraph<V, E>::locateVex(const string &key) -> typename list<Vertex<V, E>>::iterator
+auto DGraph<V, E>::locateVertex(const string &key) -> typename list<Vertex<V, E>>::iterator
 {
     return std::find_if(vertexList.begin(), vertexList.end(),
                         [&key](const Vertex<V, E> &v) { return v.getKey() == key; });
 }
 
 template <typename V, typename E>
-void DGraph<V, E>::putVex(const string &key, V &&value)
+auto DGraph<V, E>::locateVex(const string &key) const -> typename list<Vertex<V, E>>::const_iterator
+{
+    return std::find_if(vertexList.begin(), vertexList.end(),
+                        [&key](const Vertex<V, E> &v) { return v.getKey() == key; });
+}
+
+template <typename V, typename E>
+void DGraph<V, E>::putVex(const string &key, V &&value) const
 {
     auto pos = locateVex(key);
     if (pos == getVListEnd())
@@ -112,7 +133,7 @@ void DGraph<V, E>::putVex(const string &key, V &&value)
 }
 
 template <typename V, typename E>
-void DGraph<V, E>::putVex(const string &key, const V &value)
+void DGraph<V, E>::putVex(const string &key, const V &value) const
 {
     auto pos = locateVex(key);
     if (pos == getVListEnd())
@@ -123,7 +144,8 @@ void DGraph<V, E>::putVex(const string &key, const V &value)
 }
 
 template <typename V, typename E>
-auto DGraph<V, E>::firstAdjVex(const string &key) -> typename list<Vertex<V, E>>::iterator
+auto DGraph<V, E>::firstAdjVex(const string &key) const ->
+    typename list<Vertex<V, E>>::const_iterator
 {
     auto pos = locateVex(key);
     if (pos == getVListEnd())
@@ -138,8 +160,8 @@ auto DGraph<V, E>::firstAdjVex(const string &key) -> typename list<Vertex<V, E>>
 }
 
 template <typename V, typename E>
-auto DGraph<V, E>::nextAdjVex(const string &key, const string &refKey) ->
-    typename list<Vertex<V, E>>::iterator
+auto DGraph<V, E>::nextAdjVex(const string &key, const string &refKey) const ->
+    typename list<Vertex<V, E>>::const_iterator
 {
     auto vpos = locateVex(key);
     if (vpos == getVListEnd())
@@ -157,41 +179,44 @@ auto DGraph<V, E>::nextAdjVex(const string &key, const string &refKey) ->
 template <typename V, typename E>
 void DGraph<V, E>::insertVex(Vertex<V, E> &&newVex)
 {
-    auto pos = locateVex(newVex.getKey());
+    auto pos = locateVertex(newVex.getKey());
     if (pos != getVListEnd())
     {
         throw std::logic_error("[Error]: Vertex<" + newVex.getKey() + "> has existed!");
     }
     vertexList.push_back(newVex);
+    vexNum++;
 }
 
 template <typename V, typename E>
 void DGraph<V, E>::insertVex(const Vertex<V, E> &newVex)
 {
-    auto pos = locateVex(newVex.getKey());
+    auto pos = locateVertex(newVex.getKey());
     if (pos != getVListEnd())
     {
         throw std::logic_error("[Error]: Vertex<" + newVex.getKey() + "> has existed!");
     }
     vertexList.push_back(newVex);
+    vexNum++;
 }
 
 template <typename V, typename E>
 void DGraph<V, E>::deleteVex(const string &key)
 {
-    auto pos = locateVex(key);
+    auto pos = locateVertex(key);
     if (pos == getVListEnd())
     {
         throw std::logic_error("[Error]: Vertex<" + key + "> does not exist!");
     }
     vertexList.erase(pos);
+    vexNum--;
 }
 
 template <typename V, typename E>
 void DGraph<V, E>::insertEdge(Edge<E> &&edge)
 {
-    auto v1pos = locateVex(edge.getFrom());
-    auto v2pos = locateVex(edge.getTo());
+    auto v1pos = locateVertex(edge.getFrom());
+    auto v2pos = locateVertex(edge.getTo());
     if (v1pos == getVListEnd())
     {
         throw std::logic_error("[Error]: Vertex<" + edge.getFrom() + "> does not exist!");
@@ -201,13 +226,14 @@ void DGraph<V, E>::insertEdge(Edge<E> &&edge)
         throw std::logic_error("[Error]: Vertex<" + edge.getTo() + "> does not exist!");
     }
     v1pos->addEdge(edge);
+    edgeNum++;
 }
 
 template <typename V, typename E>
 void DGraph<V, E>::insertEdge(const Edge<E> &edge)
 {
-    auto v1pos = locateVex(edge.getFrom());
-    auto v2pos = locateVex(edge.getTo());
+    auto v1pos = locateVertex(edge.getFrom());
+    auto v2pos = locateVertex(edge.getTo());
     if (v1pos == getVListEnd())
     {
         throw std::logic_error("[Error]: Vertex<" + edge.getFrom() + "> does not exist!");
@@ -217,24 +243,26 @@ void DGraph<V, E>::insertEdge(const Edge<E> &edge)
         throw std::logic_error("[Error]: Vertex<" + edge.getTo() + "> does not exist!");
     }
     v1pos->addEdge(edge);
+    edgeNum++;
 }
 
 template <typename V, typename E>
 void DGraph<V, E>::deleteEdge(const string &fromKey, const string &toKey)
 {
-    auto vpos = locateVex(fromKey);
+    auto vpos = locateVertex(fromKey);
     if (vpos == getVListEnd())
     {
         throw std::logic_error("[Error]: Vertex<" + fromKey + "> does not exist!");
     }
     vpos->deleteEdge(toKey);
+    edgeNum--;
 }
 
 template <typename V, typename E>
 void DGraph<V, E>::DFSTraverse(std::function<void(const Vertex<V, E> &)> f) const
 {
     std::unordered_set<string> keySet;
-    for (Vertex<V, E> &v : vertexList)
+    for (const Vertex<V, E> &v : vertexList)
     {
         if (keySet.size() == vertexList.size())
         {
@@ -248,8 +276,8 @@ void DGraph<V, E>::DFSTraverse(std::function<void(const Vertex<V, E> &)> f) cons
 }
 
 template <typename V, typename E>
-void DGraph<V, E>::dfs(Vertex<V, E> &v, std::unordered_set<string> &keySet,
-                       std::function<void(const Vertex<V, E> &)> f)
+void DGraph<V, E>::dfs(const Vertex<V, E> &v, std::unordered_set<string> &keySet,
+                       std::function<void(const Vertex<V, E> &)> f) const
 {
     keySet.insert(v.getKey());
     f(v);
@@ -269,16 +297,16 @@ void DGraph<V, E>::dfs(Vertex<V, E> &v, std::unordered_set<string> &keySet,
 template <typename V, typename E>
 void DGraph<V, E>::BFSTraverse(std::function<void(const Vertex<V, E> &)> f) const
 {
-    std::queue<Vertex<V, E> *> vexQue;
+    std::queue<typename list<Vertex<V, E>>::const_iterator> vexQue;
     std::unordered_set<string> keySet;
-    for (Vertex<V, E> &v : vertexList)
+    for (auto v = getVListBeg(); v != getVListEnd(); v++)
     {
-        if (keySet.find(v.getKey()) == keySet.end())
+        if (keySet.find(v->getKey()) == keySet.end())
         {
-            vexQue.push(&v);
+            vexQue.push(v);
             while (!vexQue.empty())
             {
-                Vertex<V, E> *vex = vexQue.front();
+                auto vex = vexQue.front();
                 vexQue.pop();
                 f(*vex);
                 keySet.insert(vex->getKey());
@@ -286,7 +314,7 @@ void DGraph<V, E>::BFSTraverse(std::function<void(const Vertex<V, E> &)> f) cons
                 {
                     if (keySet.find(epos->getTo()) != keySet.end())
                     {
-                        vexQue.push(&(*locateVex(epos->getTo())));
+                        vexQue.push(locateVex(epos->getTo()));
                     }
                 }
             }

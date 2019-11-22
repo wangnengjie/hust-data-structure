@@ -11,8 +11,6 @@ class Edge
     string from;
     string to;
     E edgeInfo;
-    auto setFrom(const string &newFrom) -> Edge<E> &;
-    auto setTo(const string &newTo) -> Edge<E> &;
 
   public:
     Edge() = delete;
@@ -38,19 +36,5 @@ template <typename E>
 auto Edge<E>::setInfo(const E &info) const -> Edge<E> &
 {
     edgeInfo = info;
-    return *this;
-}
-
-template <typename E>
-auto Edge<E>::setFrom(const string &newFrom) -> Edge<E> &
-{
-    from = newFrom;
-    return *this;
-}
-
-template <typename E>
-auto Edge<E>::setTo(const string &newTo) -> Edge<E> &
-{
-    to = newTo;
     return *this;
 }
