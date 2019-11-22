@@ -58,7 +58,7 @@ void loadFromFile(BiTree *);
 
 int main(void)
 {
-    system("mode con cols=100 lines=40");
+    system("mode con cols=150 lines=40");
     BiTree *TreeTable = (BiTree *)malloc(MAX_TREE_TABLE_SIZE * sizeof(BiTree));
     for (int i = 0; i < MAX_TREE_TABLE_SIZE; i++)
     {
@@ -231,6 +231,8 @@ int main(void)
             case 13:
             case 14:
             {
+
+                printTree(curTree);
                 printf("Traverse Tree %d: \n", treeIndex + 1);
                 Status st = TraverseTree(curTree, option - 11, printValue);
                 st ==
@@ -269,7 +271,7 @@ int main(void)
             }
             case 18:
             {
-                printf("load tree from file to tree %d", treeIndex + 1);
+                printf("load tree from file to tree %d\n", treeIndex + 1);
                 loadFromFile(curTree);
                 break;
             }
