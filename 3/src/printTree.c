@@ -93,12 +93,12 @@ Status printTree(BiTree *T)
 
     int height = 2 * BiTreeDepth(T) - 1;
 
-    printf("\n");
+    putchar('\n');
 
     Status status = create(T, height, consoleWidth);
     if (status != OK)
         return ERRORS;
 
-    printf("\n");
+    putchar('\n');
     return OK;
 }
