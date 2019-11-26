@@ -23,6 +23,18 @@ class Edge
     auto getInfo() const -> E & { return edgeInfo; };
     auto setInfo(E &&info) const -> Edge<E> &;
     auto setInfo(const E &info) const -> Edge<E> &;
+
+  public:
+    friend std::ostream &operator<<(std::ostream &out, const Edge<E> &e)
+    {
+        out << string("<") << e.getFrom() << "," << e.getTo() << "," << e.getInfo() << ">";
+        return out;
+    }
+    friend std::istream &operator>>(std::istream &in, Edge<E> &e)
+    {
+        in >> e.from >> e.to >> e.edgeInfo;
+        return in;
+    }
 };
 
 template <typename E>

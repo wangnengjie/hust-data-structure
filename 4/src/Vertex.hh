@@ -8,7 +8,6 @@ using std::list;
 template <typename V, typename E>
 class Vertex
 {
-
   private:
     string key;
     V vexInfo;
@@ -32,6 +31,19 @@ class Vertex
     void addEdge(Edge<E> &&newEdge);
     void addEdge(const Edge<E> &newEdge);
     void deleteEdge(const string &TVKey);
+
+  public:
+    friend std::ostream &operator<<(std::ostream &out, const Vertex<V, E> &v)
+    {
+        out << string("<key(") << v.getKey() << "),info(" << v.getInfo() << ")>";
+        return out;
+    }
+
+    friend std::istream &operator>>(std::istream &in, Vertex<V, E> &v)
+    {
+        in >> v.key >> v.vexInfo;
+        return in;
+    }
 };
 
 template <typename V, typename E>

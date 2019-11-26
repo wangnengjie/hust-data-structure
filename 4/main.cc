@@ -1,43 +1,70 @@
 #include "DGraph.hh"
 #include <iostream>
+#include <memory>
 
-void print(const Vertex<string, string> &v)
-{
-    std::cout << v.getKey() + "\t" + v.getInfo() << std::endl;
-}
+#define INITIAL_TABLE_SIZE
+
+using std::make_shared;
+using std::shared_ptr;
+
+void printVex(const Vertex<string, string> &v);
+void printMenu();
 
 auto main() -> int
 {
-    try
+    unsigned int tableSize{INITIAL_TABLE_SIZE};
+    std::vector<shared_ptr<DGraph<int, int>>> DGraphTable(tableSize, nullptr);
+    unsigned int curGraph{0};
+    unsigned int option{0};
+    do
     {
-        std::list<Vertex<string, string>> vList;
-        vList.emplace_back("asdasd", "aaaa");
-        vList.emplace_back("dfis", "aaaa");
-        vList.emplace_back("hzytql", "aaaa");
-        vList.emplace_back("hqntql", "aaaa");
-        list<Edge<string>> aList;
-        aList.emplace_back("asdasd", "dfis", "aaaa");
-        aList.emplace_back("asdasd", "hzytql", "aaaa");
-        aList.emplace_back("dfis", "hqntql", "aaaa");
-        DGraph<string, string> myGraph(vList, aList);
-        auto p = myGraph.nextAdjVex("asdasd", "dfis");
-        if (p != myGraph.getVListEnd())
+        printMenu();
+        std::cin >> option;
+        std::cin.sync();
+        try
         {
-            std::cout << p->getKey() << std::endl;
+            switch (option)
+            {
+            case 0:
+                break;
+            case 1:
+                break;
+            case 2:
+                std::cout << "Destory Graph " << curGraph << std::endl;
+                DGraphTable[curGraph].reset();
+                std::cout << "[Info]: Success" << std::endl;
+                break;
+            }
         }
-        myGraph.DFSTraverse(print);
-    }
-    catch (create_graph_error &e)
-    {
-        std::cout << e.what() << std::endl;
-    }
-    catch (std::logic_error &e)
-    {
-        std::cout << e.what() << std::endl;
-    }
-    catch (std::bad_alloc &e)
-    {
-        std::cout << e.what() << std::endl;
-    }
+        catch (create_graph_error &msg)
+        {
+            DGraphTable[curGraph].reset();
+            std::cout << msg.what() << std::endl;
+        }
+        catch (std::logic_error &msg)
+        {
+            std::cout << msg.what() << std::endl;
+        }
+    } while (option != 0U);
     return 0;
 }
+
+void printMenu()
+{
+    std::cout << "               Menu of Graph's options           \n"
+                 "-------------------------------------------------\n"
+                 "|                     0. exit                   |\n"
+                 "|                                               |\n"
+                 "|    1. CreateGraph        2. DestroyGraph      |\n"
+                 "|    3. LocateVex          4. PutVex            |\n"
+                 "|    5. FirstAdjVex        6. NextAdjVex        |\n"
+                 "|    7. InsertVex          8. DeleteVex         |\n"
+                 "|    9. InsertArc          10. DeleteArc        |\n"
+                 "|    11. DFSTraverse       12. BFSTraverse      |\n"
+                 "|    13. switchGraph       14. saveToFile       |\n"
+                 "|    15. loadFromFile                           |\n"
+                 "-------------------------------------------------\n\n"
+              << std::endl;
+}
+
+void printVex(const Vertex<string, string> &v) { std::cout << v << std::endl; }
