@@ -14,23 +14,35 @@ class Edge
 
   public:
     Edge() = delete;
+    /**
+     * create graph
+     * @param from the begin of edge
+     * @param to the end of edge
+     * @param info the information of edge
+     */
     Edge(string from, string to, E &&info)
         : from(std::move(from)), to(std::move(to)), edgeInfo(std::move(info)){};
+    /**
+     * create graph
+     * @param from the begin of edge
+     * @param to the end of edge
+     * @param info the information of edge
+     */
     Edge(string from, string to, const E &info)
         : from(std::move(from)), to(std::move(to)), edgeInfo(info){};
     auto getFrom() const { return from; };
     auto getTo() const { return to; };
-    auto getInfo() const -> E & { return edgeInfo; };
+    auto getInfo() const -> const E & { return edgeInfo; };
     auto setInfo(E &&info) const -> Edge<E> &;
     auto setInfo(const E &info) const -> Edge<E> &;
 
   public:
-    friend std::ostream &operator<<(std::ostream &out, const Edge<E> &e)
+    friend auto operator<<(std::ostream &out, const Edge<E> &e) -> std::ostream &
     {
         out << string("<") << e.getFrom() << "," << e.getTo() << "," << e.getInfo() << ">";
         return out;
     }
-    friend std::istream &operator>>(std::istream &in, Edge<E> &e)
+    friend auto operator>>(std::istream &in, Edge<E> &e) -> std::istream &
     {
         in >> e.from >> e.to >> e.edgeInfo;
         return in;

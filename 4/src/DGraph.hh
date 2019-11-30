@@ -21,6 +21,11 @@ class DGraph
     list<Vertex<V, E>> vertexList;
 
   public:
+    /**
+     * create a directed graph
+     * @param VList the list of vertex
+     * @param edgeList the list of edge
+     */
     DGraph(const list<Vertex<V, E>> &VList, const list<Edge<E>> &edgeList);
 
   public:
@@ -34,33 +39,103 @@ class DGraph
     {
         return vertexList.cend();
     };
+    /**
+     * get the vertex
+     * @param key the unique key of vertex
+     * @return a const iterator point to the vertex which may point to end
+     */
     auto locateVex(const string &key) const -> typename list<Vertex<V, E>>::const_iterator;
 
   private:
+    /**
+     * get the vertex
+     * @param key the unique key of vertex
+     * @return a iterator point to the vertex which may point to end
+     */
     auto locateVertex(const string &key) -> typename list<Vertex<V, E>>::iterator;
 
   public:
-    void putVex(const string &key, V &&value) const;
-    void putVex(const string &key, const V &value) const;
+    /**
+     * update the value or info of vertex
+     * @param key the unique key of vertex
+     * @param value new value or info of the vertex
+     */
+    void putVex(const string &key, V &&value);
+    /**
+     * update the value or info of vertex
+     * @param key the unique key of vertex
+     * @param value new value or info of the vertex
+     */
+    void putVex(const string &key, const V &value);
+    /**
+     * insert a new vertex
+     * @param newVex vertex
+     */
     void insertVex(Vertex<V, E> &&newVex);
+    /**
+     * insert a new vertex
+     * @param newVex vertex
+     */
     void insertVex(const Vertex<V, E> &newVex);
+    /**
+     * delete vertex based on key
+     * @param key the unique key of the vertex to delete
+     */
     void deleteVex(const string &key);
 
   public:
+    /**
+     * insert a new edge
+     * @param edge edge
+     */
     void insertEdge(Edge<E> &&edge);
+    /**
+     * insert a new edge
+     * @param edge edge
+     */
     void insertEdge(const Edge<E> &edge);
+    /**
+     * delete edge by it's begin and end
+     * @param fromKey the unique key of begin vertex
+     * @param toKey the unique key of end vertex
+     */
     void deleteEdge(const string &fromKey, const string &toKey);
 
   public:
+    /**
+     * find the adj vertex of a vertex
+     * @param key the unique key of the vertex
+     * @return a iterator point to the target vertex which may be point to end
+     */
     auto firstAdjVex(const string &key) const -> typename list<Vertex<V, E>>::const_iterator;
+    /**
+     * find the next adj vertex of a vertex based on another adj vertex
+     * @param key the unique key of base vertex
+     * @param refKey the unique key of reference adj vertex
+     * @return a iterator point to the target vertex which may point to end
+     */
     auto nextAdjVex(const string &key, const string &refKey) const ->
         typename list<Vertex<V, E>>::const_iterator;
 
   public:
+    /**
+     * DFS
+     * @param f visit func(const Vertex<V,E> &)
+     */
     void DFSTraverse(std::function<void(const Vertex<V, E> &)> f) const;
+    /**
+     * BFS
+     * @param f visit func(const Vertex<V,E> &)
+     */
     void BFSTraverse(std::function<void(const Vertex<V, E> &)> f) const;
 
   private:
+    /**
+     * DFS helper
+     * @param v current vertex
+     * @param keySet a set which save the visited vertex
+     * @param f visit func(const Vertex<V,E> &)
+     */
     void dfs(const Vertex<V, E> &v, std::unordered_set<string> &keySet,
              std::function<void(const Vertex<V, E> &)> f) const;
 };
@@ -122,9 +197,9 @@ auto DGraph<V, E>::locateVex(const string &key) const -> typename list<Vertex<V,
 }
 
 template <typename V, typename E>
-void DGraph<V, E>::putVex(const string &key, V &&value) const
+void DGraph<V, E>::putVex(const string &key, V &&value)
 {
-    auto pos = locateVex(key);
+    auto pos = locateVertex(key);
     if (pos == getVListEnd())
     {
         throw std::logic_error("[Error]: Vertex<" + key + "> does not exist!");
@@ -133,9 +208,9 @@ void DGraph<V, E>::putVex(const string &key, V &&value) const
 }
 
 template <typename V, typename E>
-void DGraph<V, E>::putVex(const string &key, const V &value) const
+void DGraph<V, E>::putVex(const string &key, const V &value)
 {
-    auto pos = locateVex(key);
+    auto pos = locateVertex(key);
     if (pos == getVListEnd())
     {
         throw std::logic_error("[Error]: Vertex<" + key + "> does not exist!");
@@ -208,6 +283,8 @@ void DGraph<V, E>::deleteVex(const string &key)
     {
         throw std::logic_error("[Error]: Vertex<" + key + "> does not exist!");
     }
+    std::for_each(vertexList.begin(), vertexList.end(),
+                  [&key](Vertex<V, E> &v) { v.deleteEdge(key); });
     vertexList.erase(pos);
     vexNum--;
 }
@@ -312,9 +389,10 @@ void DGraph<V, E>::BFSTraverse(std::function<void(const Vertex<V, E> &)> f) cons
                 keySet.insert(vex->getKey());
                 for (auto epos = vex->getEListBeg(); epos != vex->getEListEnd(); epos++)
                 {
-                    if (keySet.find(epos->getTo()) != keySet.end())
+                    if (keySet.find(epos->getTo()) == keySet.end())
                     {
                         vexQue.push(locateVex(epos->getTo()));
+                        keySet.insert(epos->getTo());
                     }
                 }
             }

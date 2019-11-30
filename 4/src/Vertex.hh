@@ -15,7 +15,17 @@ class Vertex
 
   public:
     Vertex() = delete;
+    /**
+     * create vertex
+     * @param key the unique key of vertex
+     * @param info the value or information of vertex
+     */
     Vertex(string key, V &&info) : key(std::move(key)), vexInfo(std::move(info)){};
+    /**
+     * create vertex
+     * @param key the unique key of vertex
+     * @param info the value or information of vertex
+     */
     Vertex(string key, const V &info) : key(std::move(key)), vexInfo(info){};
 
   public:
@@ -24,8 +34,10 @@ class Vertex
     auto getEListEnd() const -> typename list<Edge<E>>::const_iterator { return eList.cend(); };
     auto getInfo() const -> const V & { return vexInfo; };
     auto getKey() const { return key; };
-    void setInfo(V &&info) const { vexInfo = std::move(info); };
-    void setInfo(const V &info) const { vexInfo = info; };
+
+  public:
+    void setInfo(V &&info) { vexInfo = std::move(info); };
+    void setInfo(const V &info) { vexInfo = info; };
 
   public:
     void addEdge(Edge<E> &&newEdge);
@@ -33,13 +45,13 @@ class Vertex
     void deleteEdge(const string &TVKey);
 
   public:
-    friend std::ostream &operator<<(std::ostream &out, const Vertex<V, E> &v)
+    friend auto operator<<(std::ostream &out, const Vertex<V, E> &v) -> std::ostream &
     {
-        out << string("<key(") << v.getKey() << "),info(" << v.getInfo() << ")>";
+        out << string("<key(") << v.getKey() << "),value(" << v.getInfo() << ")>";
         return out;
     }
 
-    friend std::istream &operator>>(std::istream &in, Vertex<V, E> &v)
+    friend auto operator>>(std::istream &in, Vertex<V, E> &v) -> std::istream &
     {
         in >> v.key >> v.vexInfo;
         return in;
@@ -61,13 +73,11 @@ void Vertex<V, E>::addEdge(const Edge<E> &newEdge)
 template <typename V, typename E>
 void Vertex<V, E>::deleteEdge(const string &TVKey)
 {
-    typename list<Edge<E>>::iterator pos = locateEdge(TVKey);
-    if (pos == eList.end())
+    auto e = locateEdge(TVKey);
+    if (e != eList.end())
     {
-        throw std::logic_error("[Error]: Vertex<" + key + "> does not has a edge to Vertex<" +
-                               TVKey + ">");
+        eList.erase(e);
     }
-    eList.erase(pos);
 }
 
 template <typename V, typename E>
