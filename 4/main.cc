@@ -5,7 +5,12 @@
 
 using std::make_shared;
 using std::shared_ptr;
-
+/**
+ * whether the graph is nullptr
+ * @tparam V info type of vertex
+ * @tparam E info type of edge
+ * @param p a pointer -> graph
+ */
 template <typename V, typename E>
 inline void shouldInit(const shared_ptr<DGraph<V, E>> &p)
 {
@@ -14,14 +19,41 @@ inline void shouldInit(const shared_ptr<DGraph<V, E>> &p)
         throw std::logic_error("[Error]: Graph has not initialized");
     }
 };
-
+/**
+ * print vertex to shell
+ * @tparam V info type of vertex
+ * @tparam E info type of edge
+ * @param v vertex
+ */
 template <typename V, typename E>
 void printVex(const Vertex<V, E> &v);
-
+/**
+ * print the option menu
+ */
 void printMenu();
+/**
+ * read and create vertex list from stream
+ * @param in istream
+ * @param size the amount of vertex
+ * @return vertex list
+ */
 auto readVex(std::istream &in, unsigned int size) -> list<Vertex<int, int>>;
+/**
+ * read and create edge list from stream
+ * @param in istream
+ * @param size the amount of edge
+ * @return edge list
+ */
 auto readEdge(std::istream &in, unsigned int size) -> list<Edge<int>>;
+/**
+ * save a graph to file
+ * @param p a pointer -> graph
+ */
 void saveToFile(const shared_ptr<DGraph<int, int>> &p);
+/**
+ * read a graph from file
+ * @param p a pointer -> graph
+ */
 void loadFromFile(shared_ptr<DGraph<int, int>> &p);
 
 auto main() -> int
@@ -228,11 +260,11 @@ auto main() -> int
             curGraph.reset();
             std::cout << msg.what() << std::endl;
         }
-        catch (std::logic_error &msg)
+        catch (std::out_of_range &msg)
         {
             std::cout << msg.what() << std::endl;
         }
-        catch (std::out_of_range &msg)
+        catch (std::logic_error &msg)
         {
             std::cout << msg.what() << std::endl;
         }
