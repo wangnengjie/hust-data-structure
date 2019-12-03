@@ -270,7 +270,11 @@ auto main() -> int
         }
         getchar();
         getchar();
+#ifdef WIN32
+        system("cls");
+#else
         system("clear");
+#endif
     } while (option != 0U);
     std::cout << "Done!" << std::endl;
     return 0;
